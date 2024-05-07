@@ -1,0 +1,4 @@
+.venv
+__pycache__
+tiny_distributed_db/__pycache__
+.idea
