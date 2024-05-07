@@ -38,7 +38,7 @@ city = pd.DataFrame({
         "TURIN",
 
         "VALENCE",
-        "TURIN",
+        "MADRID",
         "BILBAO",
 
         "AUCKLAND",
