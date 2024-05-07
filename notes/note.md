@@ -101,3 +101,18 @@ It monitors each event that occurs during the execution of a join query.
 - Node workload is represented by the computational cost of a double nested loop between two tables. This excludes considerations of reading, writing, and I/O operations.
 - Cluster workload is represented by the maximum cost among all its nodes. Assuming all nodes are equal and perform the join operation in parallel.
 
+## Experiment
+
+Find here the description of each experiment.
+
+### Exp. 1
+
+Show the correctness of the shuffle and broadcast join strategy.
+
+### Exp. 2
+
+Show how to perform join on large dataset (randomly generated).
+
+### Exp. 3
+
+Show the impact of the broadcast table on the network workload.

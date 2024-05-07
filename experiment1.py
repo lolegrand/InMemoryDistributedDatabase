@@ -3,7 +3,7 @@ import pandas as pd
 from tiny_distributed_db.Cluster import Cluster
 
 """
-In this experiment I want to show a simple presentation of this application.
+Show the correctness of the shuffle and broadcast join strategy.
 """
 
 NUMBER_OF_COUNTRY = 5

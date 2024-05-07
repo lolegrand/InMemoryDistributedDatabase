@@ -4,7 +4,7 @@ from tiny_distributed_db.Cluster import Cluster
 from utils import random_string, generate_idx_from_uniforme
 
 """
-In this experiment I want to how to work with huge dataset.
+Show how to perform join on huge dataset (randomly generated).
 """
 
 NUMBER_OF_ROW_IN_TABLE_A = 250
