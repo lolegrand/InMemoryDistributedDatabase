@@ -39,7 +39,51 @@ class Node:
     def load_in_memory(self, table: str):
         self.volatileMemory.save_rows(table, self.tables[table])
 
-    def perform_join(self, table_name_a: str, column_a: str, table_name_b: str, column_b: str, network: Network) -> (pd.DataFrame, int):
+    def flow_table_right(self, table_name: str, column: str, column_strategy: str, network: Network):
+        df = self.tables[table_name]
+
+        # Shuffle
+        to_shuffle = df[df[column_strategy] == "shuffle"]
+        grouped = to_shuffle.groupby(lambda x: to_shuffle.loc[x, column] % self.number_of_node)
+        for i, group in grouped:
+            if i != self.id:
+                message = Message(self.id, i, table_name, group)
+                network.send_message(message)
+            else:
+                self.volatileMemory.save_rows(table_name, group)
+
+        # Broadcast
+        to_broadcast = df[df[column_strategy] == "broadcast"]
+        for i in range(self.number_of_node):
+            if i != self.id:
+                message = Message(self.id, i, table_name, to_broadcast)
+                network.send_message(message)
+            else:
+                self.volatileMemory.save_rows(table_name, to_broadcast)
+
+    def flow_table_left(self, table_name: str, column: str, column_strategy: str, network: Network):
+        df = self.tables[table_name]
+
+        # Shuffle
+        to_shuffle = df[df[column_strategy] == "shuffle"]
+        grouped = to_shuffle.groupby(lambda x: to_shuffle.loc[x, column] % self.number_of_node)
+        for i, group in grouped:
+            if i != self.id:
+                message = Message(self.id, i, table_name, group)
+                network.send_message(message)
+            else:
+                self.volatileMemory.save_rows(table_name, group)
+
+        # Broadcast
+        to_broadcast = df[df[column_strategy] == "broadcast"]
+        self.volatileMemory.save_rows(table_name, to_broadcast)
+
+    def perform_join(self,
+                     table_name_a: str,
+                     column_a: str,
+                     table_name_b: str,
+                     column_b: str,
+                     network: Network) -> (pd.DataFrame, int):
         table_a = pd.DataFrame(columns=self.tables[table_name_a].columns)
         table_b = pd.DataFrame(columns=self.tables[table_name_b].columns)
 

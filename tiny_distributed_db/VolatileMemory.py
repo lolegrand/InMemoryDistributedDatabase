@@ -8,7 +8,7 @@ class VolatileMemory:
 
     def save_rows(self, table_name: str, rows: pd.DataFrame):
         if table_name in self.tables:
-            self.tables = pd.concat([self.tables[table_name], rows])
+            self.tables[table_name] = pd.concat([self.tables[table_name], rows])
         else:
             self.tables[table_name] = rows
 

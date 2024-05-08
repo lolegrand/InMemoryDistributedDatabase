@@ -15,7 +15,8 @@ country = pd.DataFrame({
         "SPAIN",
         "ITALIA",
         "NEW-ZEALAND"
-    ]
+    ],
+    'joinType': ["shuffle", "broadcast"] + ["shuffle"] * 3
 })
 
 NUMBER_OF_CITY = 17
@@ -44,9 +45,12 @@ city = pd.DataFrame({
         "AUCKLAND",
         "QUEENSTOWN"
     ],
-    'fk': [1, 1, 1, 1, 1, 0, 0, 0, 3, 3, 3, 3, 2, 2, 2, 4, 4]
+    'fk': [1, 1, 1, 1, 1, 0, 0, 0, 3, 3, 3, 3, 2, 2, 2, 4, 4],
+    'joinType': ["broadcast"] * 5 + ["shuffle"] * 12
 })
 
+print(city)
+print(country)
 
 cluster = Cluster(3)
 cluster.insert("country", country)
@@ -61,6 +65,12 @@ print(df)
 print()
 
 df, w = cluster.shuffle_join("country", "id", "city", "fk")
+print(w)
+print(len(df.index))
+print(df)
+print()
+
+df, w = cluster.flow_join("country", "id", "joinType", "city", "fk", "joinType")
 print(w)
 print(len(df.index))
 print(df)

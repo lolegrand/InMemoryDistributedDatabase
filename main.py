@@ -1,18 +1,32 @@
-import random
-
-import matplotlib.pyplot as plt
 import pandas as pd
-import seaborn as sns
-import numpy as np
 
-from utils import generate_idx_from_normal
+city = pd.DataFrame({
+    'id': list(range(17)),
+    'city_name': [
+        "CLERMONT-FERRAND",
+        "STRASBOURG",
+        "LANNION",
+        "TOULOUSE",
+        "LILLE",
 
-A = 0
-B = 500
-lambda_ = 1.0
-size = 1000
-data = generate_idx_from_normal(A, B, 1000, 0.0, 1.0)
+        "TOKYO",
+        "OSAKA",
+        "KOBE",
 
-sns.histplot(data)
-plt.show()
+        "VENISE",
+        "ROME",
+        "BOLOGNE",
+        "TURIN",
 
+        "VALENCE",
+        "MADRID",
+        "BILBAO",
+
+        "AUCKLAND",
+        "QUEENSTOWN"
+    ],
+    'fk': [1, 1, 1, 1, 1, 0, 0, 0, 3, 3, 3, 3, 2, 2, 2, 4, 4],
+})
+
+gb = city.groupby(['fk'])
+print(gb[0])

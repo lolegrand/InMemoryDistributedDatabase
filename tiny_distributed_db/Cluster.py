@@ -43,7 +43,23 @@ class Cluster:
 
         return self._perform_join(table_a, column_a, table_b, column_b, network, JoinType.SHUFFLE)
 
-    def _perform_join(self, table_a: str, column_a: str, table_b: str, column_b: str, network: Network, join_type: JoinType) -> (pd.DataFrame, Workload):
+    def flow_join(self,
+                  table_a: str,
+                  column_a: str,
+                  column_a_join_strategy: str,
+                  table_b: str,
+                  column_b: str,
+                  column_b_join_strategy: str) -> (pd.DataFrame, Workload):
+
+        network = Network()
+        for node in self.nodes:
+            node.flow_table_left(table_b, column_b, column_b_join_strategy, network)
+            node.flow_table_right(table_a, column_a, column_a_join_strategy, network)
+
+        return self._perform_join(table_a, column_a, table_b, column_b, network, JoinType.FLOW)
+
+    def _perform_join(self, table_a: str, column_a: str, table_b: str, column_b: str, network: Network,
+                      join_type: JoinType) -> (pd.DataFrame, Workload):
         dfs = []
         workload_hist = {}
         for node in self.nodes:
