@@ -31,6 +31,7 @@ class Cluster:
         network = Network()
         for node in self.nodes:
             node.broadcast_table(table_a, network)
+            node.load_in_memory(table_b)
 
         return self._perform_join(table_a, column_a, table_b, column_b, network, JoinType.BROADCAST)
 
@@ -46,7 +47,7 @@ class Cluster:
         dfs = []
         workload_hist = {}
         for node in self.nodes:
-            df, workload = node.perform_join(table_a, column_a, table_b, column_b, network, join_type)
+            df, workload = node.perform_join(table_a, column_a, table_b, column_b, network)
             workload_hist[node.id] = workload
             dfs.append(df)
 
