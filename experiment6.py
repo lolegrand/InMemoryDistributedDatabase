@@ -5,9 +5,11 @@ from matplotlib import pyplot as plt
 from tiny_distributed_db.Cluster import Cluster
 from utils import random_string, generate_idx_from_uniforme
 
+fl_cluster_wl_hist = []
 sh_cluster_wl_hist = []
 bc_cluster_wl_hist = []
 
+fl_network_wl_hist = []
 sh_network_wl_hist = []
 bc_network_wl_hist = []
 
@@ -18,15 +20,19 @@ for i in heavy_hitter_size:
     table_a = pd.DataFrame({
         'id': list(range(NUMBER_OF_ROW_IN_TABLE_A)),
         'string': [random_string() for _ in range(NUMBER_OF_ROW_IN_TABLE_A)],
+        'joinType': ["broadcast"] + ["shuffle"] * (NUMBER_OF_ROW_IN_TABLE_A - 1)
     })
 
     ids = generate_idx_from_uniforme(0, NUMBER_OF_ROW_IN_TABLE_A, NUMBER_OF_ROW_IN_TABLE_B)
     ids[0:i] = [0] * i
+    joinType = ["shuffle"] * NUMBER_OF_ROW_IN_TABLE_B
+    joinType[0:i] = ["broadcast"] * i
 
     table_b = pd.DataFrame({
         'id': list(range(NUMBER_OF_ROW_IN_TABLE_B)),
         'string': [random_string() for _ in range(NUMBER_OF_ROW_IN_TABLE_B)],
-        'fk': ids
+        'fk': ids,
+        'joinType': joinType
     })
 
     cluster = Cluster(5)
@@ -39,22 +45,33 @@ for i in heavy_hitter_size:
     sh_network_wl_hist.append(workload.network_workload)
 
     _, workload = cluster.broadcast_join("table_a", "id", "table_b", "fk")
-    bc_cluster_wl_hist.append(workload.network_workload)
+    bc_cluster_wl_hist.append(workload.cluster_workload)
     bc_network_wl_hist.append(workload.network_workload)
+
+    _, workload = cluster.flow_join("table_a", "id", "joinType", "table_b", "fk", "joinType")
+    fl_cluster_wl_hist.append(workload.cluster_workload)
+    fl_network_wl_hist.append(workload.network_workload)
 
     if i % 10 == 0:
         print(f"Done {i}")
 
+
 sh_cluster_wl_hist_df = pd.DataFrame({
     "Heavy hitter size": list(heavy_hitter_size),
-    "Nbr of comparison": sh_cluster_wl_hist,
+    "Number of comparison": sh_cluster_wl_hist,
     "JoinType": ["Shuffle"] * len(sh_cluster_wl_hist)
 })
 
 bc_cluster_wl_hist_df = pd.DataFrame({
     "Heavy hitter size": list(heavy_hitter_size),
-    "Nbr of comparison": bc_cluster_wl_hist,
+    "Number of comparison": bc_cluster_wl_hist,
     "JoinType": ["Broadcast"] * len(bc_cluster_wl_hist)
+})
+
+fl_cluster_wl_hist_df = pd.DataFrame({
+    "Heavy hitter size": list(heavy_hitter_size),
+    "Number of comparison": fl_cluster_wl_hist,
+    "JoinType": ["Flow"] * len(fl_cluster_wl_hist)
 })
 
 sh_network_wl_hist_df = pd.DataFrame({
@@ -69,13 +86,19 @@ bc_network_wl_hist_df = pd.DataFrame({
     "JoinType": ["Broadcast"] * len(bc_network_wl_hist)
 })
 
-datas_cluster = pd.concat([sh_cluster_wl_hist_df, bc_cluster_wl_hist_df])
-datas_network = pd.concat([sh_network_wl_hist_df, bc_network_wl_hist_df])
+fl_network_wl_hist_df = pd.DataFrame({
+    "Heavy hitter size": list(heavy_hitter_size),
+    "Number of row transmitted": fl_network_wl_hist,
+    "JoinType": ["Flow"] * len(fl_network_wl_hist)
+})
+
+datas_cluster = pd.concat([sh_cluster_wl_hist_df, bc_cluster_wl_hist_df, fl_cluster_wl_hist_df])
+datas_network = pd.concat([sh_network_wl_hist_df, bc_network_wl_hist_df, fl_network_wl_hist_df])
 
 fig, axs = plt.subplots(ncols=2)
 fig.set_size_inches(16, 6)
 axs[0].set_title("Cluster workload")
 axs[1].set_title("Network workload")
-sns.lineplot(data=datas_cluster, x="Heavy hitter size", y="Nbr of comparison", hue="JoinType", ax=axs[0])
+sns.lineplot(data=datas_cluster, x="Heavy hitter size", y="Number of comparison", hue="JoinType", ax=axs[0])
 sns.lineplot(data=datas_network, x="Heavy hitter size", y="Number of row transmitted", hue="JoinType", ax=axs[1])
 plt.show()
