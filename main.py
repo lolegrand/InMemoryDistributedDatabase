@@ -28,5 +28,5 @@ city = pd.DataFrame({
     'fk': [1, 1, 1, 1, 1, 0, 0, 0, 3, 3, 3, 3, 2, 2, 2, 4, 4],
 })
 
-gb = city.groupby(['fk'])
-print(gb[0])
+gb = city["fk"].value_counts().max()
+print(gb)
