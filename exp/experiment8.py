@@ -32,6 +32,7 @@ history = {
 }
 
 maxHeavyHitterSize = []
+skewnessAbsValue = []
 
 sigmaList = [i / 1000 for i in range(1, 100 + 1)]
 for sigma in sigmaList:
@@ -82,6 +83,7 @@ for sigma in sigmaList:
     history["flow"]["cluster"].append(workload.cluster_workload)
     history["flow"]["network"].append(workload.network_workload)
 
+    skewnessAbsValue.append(abs(table_b["fk"].skew()))
     print(f"Finished for {sigma} sigma")
 
 sh_cluster_wl_hist_df = pd.DataFrame({
@@ -125,15 +127,22 @@ max_heavy_hitter_size_df = pd.DataFrame({
     "Sigma": list(sigmaList)
 })
 
+skewness_hover_sigma = pd.DataFrame({
+    "Skewness": skewnessAbsValue,
+    "Sigma": list(sigmaList)
+})
+
 datas_cluster = pd.concat([sh_cluster_wl_hist_df, fl_cluster_wl_hist_df])
 datas_network = pd.concat([sh_network_wl_hist_df, fl_network_wl_hist_df])
 
-fig, axs = plt.subplots(ncols=3)
-fig.set_size_inches(16, 6)
-axs[0].set_title("Cluster workload")
-axs[1].set_title("Network workload")
-axs[2].set_title("Max heavy hitter size")
-sns.lineplot(data=datas_cluster, x="Sigma", y="Number of comparison", hue="JoinType", ax=axs[0])
-sns.lineplot(data=datas_network, x="Sigma", y="Number of row transmitted", hue="JoinType", ax=axs[1])
-sns.lineplot(data=max_heavy_hitter_size_df, x="Sigma", y="Max Heavy Hitter Size", ax=axs[2])
+fig, axs = plt.subplots(ncols=2, nrows=2)
+fig.set_size_inches(10, 10)
+axs[0][0].set_title("Cluster workload")
+axs[0][1].set_title("Network workload")
+axs[1][0].set_title("Max heavy hitter size")
+#axs[1][1].set_title("Skewness")
+sns.lineplot(data=datas_cluster, x="Sigma", y="Number of comparison", hue="JoinType", ax=axs[0][0])
+sns.lineplot(data=datas_network, x="Sigma", y="Number of row transmitted", hue="JoinType", ax=axs[0][1])
+sns.lineplot(data=max_heavy_hitter_size_df, x="Sigma", y="Max Heavy Hitter Size", ax=axs[1][0])
+#sns.lineplot(data=skewness_hover_sigma, x="Sigma", y="Skewness", ax=axs[1][1])
 plt.show()
